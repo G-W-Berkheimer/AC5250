@@ -1,0 +1,28 @@
+name: Build
+
+# Compile check for every PR and push to dev/main (ECO-1129). The Release workflow only runs on a
+# v* tag, so without this a change could not be proven to build before a release went out --
+# and a release auto-updates every installed AC5250 on its next launch.
+
+on:
+  pull_request:
+  push:
+    branches: [dev, main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build every project
+        run: dotnet build AC5250.slnx -c Release
