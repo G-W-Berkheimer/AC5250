@@ -11,7 +11,7 @@ screen and drive the keyboard.
 
 ## Install & updates
 
-Download **`Setup.exe`** from the [latest release](https://github.com/acartergwb/AC5250/releases/latest)
+Download **`Setup.exe`** from the [latest release](https://github.com/G-W-Berkheimer/AC5250/releases/latest)
 and run it **once**. It installs per-user to `%LocalAppData%\AC5250` and creates Start/Desktop
 shortcuts you can pin (taskbar/Start/desktop) — the pinned icon always launches the current
 version.
