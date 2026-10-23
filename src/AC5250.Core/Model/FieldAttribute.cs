@@ -19,6 +19,10 @@ public class FieldAttribute
     public bool IsAutoEnter { get; set; }
     public bool IsMandatoryFill { get; set; }
 
+    /// <summary>FFW byte 2 bit 0x20: the host wants letters typed into this field
+    /// uppercased (ECO-1129). Password fields at QPWDLVL 0/1 are monocase.</summary>
+    public bool IsMonocase { get; set; }
+
     // From FFW byte 2
     public FieldFormat Format { get; set; } = FieldFormat.AlphaShift;
 
@@ -46,6 +50,7 @@ public class FieldAttribute
         fa.IsModified = (ffw1 & 0x08) != 0;
         fa.IsAutoEnter = (ffw2 & 0x80) != 0;
         fa.IsMandatoryFill = (ffw2 & 0x40) != 0;
+        fa.IsMonocase = (ffw2 & 0x20) != 0;
 
         // FFW byte 2 - field format/shift
         int shift = ffw2 & 0x07;
