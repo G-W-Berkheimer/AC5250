@@ -33,7 +33,7 @@ static class Program
 
     private static void UpdateOnLaunch()
     {
-        var mgr = new UpdateManager(new GithubSource("https://github.com/acartergwb/AC5250", null, false));
+        var mgr = new UpdateManager(new GithubSource("https://github.com/G-W-Berkheimer/AC5250", null, false));
 
         // Only when running from an installed copy — the raw exe has nothing to update.
         if (!mgr.IsInstalled) return;

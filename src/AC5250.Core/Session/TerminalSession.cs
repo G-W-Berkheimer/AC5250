@@ -170,9 +170,13 @@ public class TerminalSession : IDisposable
         int idx = field.GetIndexForPosition(Screen.CursorRow, Screen.CursorCol, Screen.Cols);
         if (idx < 0 || idx >= field.Length) return;
 
-        // Monocase: uppercase letters unless this is a hidden (password) field,
-        // where case must be preserved.
-        if (UppercaseInput && !field.Attribute.IsNonDisplay)
+        // Monocase: a field the host marks MONOCASE (FFW byte 2, 0x20) is ALWAYS uppercased,
+        // hidden or not -- at QPWDLVL 0/1 the sign-on / change-password fields are monocase
+        // and IBM ACS uppercases them, so "abc12345" goes out as ABC12345 (ECO-1129; sending
+        // lowercase was rejected as invalid for password level 0). Other fields follow
+        // UppercaseInput, which still leaves a non-monocase hidden field as typed, because
+        // QPWDLVL 2/3 passwords are case-sensitive and those fields are not monocase.
+        if (field.Attribute.IsMonocase || (UppercaseInput && !field.Attribute.IsNonDisplay))
             ch = char.ToUpperInvariant(ch);
 
         byte ebcdic = Ebcdic.FromAscii(ch);

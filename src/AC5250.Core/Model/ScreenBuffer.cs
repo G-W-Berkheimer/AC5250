@@ -235,7 +235,18 @@ public class ScreenBuffer
         // has one field per position. Without this, screens that repaint without a
         // Clear (e.g. after closing the F21 command window) pile up duplicate field
         // objects, leaving a stale input box on screen that never clears.
-        Fields.RemoveAll(f => f.Row == _bufferRow && f.Col == _bufferCol);
+        // A field defined OVER part of an older one (a pop-up window's input field painted
+        // across a subfile row whose field starts in a different column -- PODBVR "Enter
+        // RGA#") replaces it too: the old field is hidden under the window and can no longer
+        // be typed into. Keeping both sent every keystroke to the old field, and the pop-up
+        // field reached the host blank ("RGA# cannot be blank", ECO-1130). Spans include each
+        // field's attribute cell (one position before its data).
+        int newFrom = _bufferRow * Cols + _bufferCol - 1, newTo = _bufferRow * Cols + _bufferCol + length - 1;
+        Fields.RemoveAll(f =>
+        {
+            int from = f.Row * Cols + f.Col - 1, to = f.Row * Cols + f.Col + f.Length - 1;
+            return from <= newTo && newFrom <= to;
+        });
 
         var field = new ScreenField(_bufferRow, _bufferCol, length, attr, Cols) { Generation = WriteGeneration };
         Fields.Add(field);
@@ -354,10 +365,12 @@ public class ScreenBuffer
 
     public ScreenField? GetFieldAt(int row, int col)
     {
-        foreach (var field in Fields)
+        // Newest first: if fields ever do overlap (a format table restored around a pop-up),
+        // the one defined last is the one on top (ECO-1130).
+        for (int i = Fields.Count - 1; i >= 0; i--)
         {
-            if (field.ContainsPosition(row, col, Cols))
-                return field;
+            if (Fields[i].ContainsPosition(row, col, Cols))
+                return Fields[i];
         }
         return null;
     }
